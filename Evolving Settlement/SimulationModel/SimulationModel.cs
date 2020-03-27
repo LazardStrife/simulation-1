@@ -975,6 +975,14 @@ namespace SimulationModel
             } while (uniform_variable == 0d); // can't choose 0 because of the log operator
             return (-Math.Log(uniform_variable)) / mean;
         }
+
+        public Tuple< List<Person>, List<Person>, List<Person>, List<Person> > DateInfo(int y, int m)
+        {
+            return new Tuple<List<Person>, List<Person>, List<Person>, List<Person>>(deceasedSubjects[y, m],
+                                                                                     bornedSubjects[y, m],
+                                                                                     maleSubjects[y, m],
+                                                                                     femaleSubjects[y, m]);
+        }
     }
 
     public class Person

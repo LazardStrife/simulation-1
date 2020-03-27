@@ -50,10 +50,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Interface\Interface.csproj">
-      <Project>{db2667fc-0a6a-455a-9135-c3e65087a520}</Project>
-      <Name>Interface</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SimulationModel\SimulationModel.csproj">
       <Project>{23f15c0b-9748-43f8-a9f4-fa5e82e50b3c}</Project>
       <Name>SimulationModel</Name>
