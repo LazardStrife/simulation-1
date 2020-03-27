@@ -15,11 +15,15 @@ namespace SimulationModel
         private int year_count;
         private int month_count;
         private Dictionary<string, Person> usedIds;
-        
+        public int births { get; private set; }
+        public int deceases { get; private set; }
+
         public Simulation()
         {
             CalcM();
             SetSeed();
+            births = 0;
+            deceases = 0;
 
             year_count = 1;
             month_count = 1;
@@ -48,20 +52,32 @@ namespace SimulationModel
                 int birth_month;
 
                 id = Generate_Id();
-                age = Generate_Uniform(0, 100);
+                age = Generate_Value(0, 100);
                 desired_children = Generate_Desired_Children();
-                birth_month = Generate_Uniform(1, 12);
-                maleSubjects[1, 1].Add(new Person(id, Gender.Male, birth_month, desired_children));
+                birth_month = Generate_Value(1, 12);
+                Person newMale = new Person(id, Gender.Male, birth_month, desired_children);
+                newMale.Set_Age(age);
+                maleSubjects[1, 1].Add(newMale);
+                usedIds[newMale.id] = newMale;
+                newMale.Set_Death_Info(Generate_Death_Info(Gender.Male, 1, newMale.age));
+                
 
                 id = Generate_Id();
-                age = Generate_Uniform(0, 100);
+                age = Generate_Value(0, 100);
                 desired_children = Generate_Desired_Children();
-                birth_month = Generate_Uniform(1, 12);
-                femaleSubjects[1, 1].Add(new Person(id, Gender.Female, birth_month, desired_children));
+                birth_month = Generate_Value(1, 12);
+                Person newFemale = new Person(id, Gender.Female, birth_month, desired_children);
+                newFemale.Set_Age(age);
+                femaleSubjects[1, 1].Add(newFemale);
+                usedIds[newFemale.id] = newFemale;
+                newFemale.Set_Death_Info(Generate_Death_Info(Gender.Female, 1, newFemale.age));
             }
 
-            while(year_count < 100)
+            while (year_count < 101)
             {
+                if (year_count == 100 && month_count == 2)
+                    break;
+
                 List<Person> subjects = new List<Person>();
                 foreach(Person p in maleSubjects[year_count, month_count])
                 {
@@ -185,7 +201,7 @@ namespace SimulationModel
 
                 foreach(Person p in subjects)
                 {
-                    if(p.gender == Gender.Female)
+                    if (p.gender == Gender.Female)
                     {
                         if (p.pregnancy_months_left > 0)
                         {
@@ -217,7 +233,16 @@ namespace SimulationModel
 
                                     Person baby = new Person(id, gender, month_count, desired_children);
                                     bornedSubjects[year_count, month_count].Add(baby);
-                                    subjects.Add(baby);
+                                    if(baby.gender == Gender.Male)
+                                    {
+                                        maleSubjects[year_count, month_count].Add(baby);
+                                    }
+                                    else
+                                    {
+                                        femaleSubjects[year_count, month_count].Add(baby);
+                                    }
+                                    usedIds[baby.id] = baby;
+                                    baby.Set_Death_Info(Generate_Death_Info(baby.gender, month_count));
                                 }
                                 p.Increase_Children_Count(p.number_of_babyes);
                                 p.Set_Number_Of_Babyes(-1);
@@ -240,111 +265,7 @@ namespace SimulationModel
                         }
                     }
 
-                    double uniform_variable_2 = Generate_Uniform();
-                    if(p.age <= 12)
-                    {
-                        if(p.gender == Gender.Male)
-                        {
-                            if(uniform_variable_2 < 0.25)
-                            {
-                                Decease(p, year_count, month_count);
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            if (uniform_variable_2 < 0.25)
-                            {
-                                Decease(p, year_count, month_count);
-                                continue;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (p.age <= 45)
-                        {
-                            if (p.gender == Gender.Male)
-                            {
-                                if (uniform_variable_2 < 0.1)
-                                {
-                                    Decease(p, year_count, month_count);
-                                    continue;
-                                }
-                            }
-                            else
-                            {
-                                if (uniform_variable_2 < 0.15)
-                                {
-                                    Decease(p, year_count, month_count);
-                                    continue;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (p.age <= 76)
-                            {
-                                if (p.gender == Gender.Male)
-                                {
-                                    if (uniform_variable_2 < 0.3)
-                                    {
-                                        Decease(p, year_count, month_count);
-                                        continue;
-                                    }
-                                }
-                                else
-                                {
-                                    if (uniform_variable_2 < 0.35)
-                                    {
-                                        Decease(p, year_count, month_count);
-                                        continue;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (p.age <= 125)
-                                {
-                                    if (p.gender == Gender.Male)
-                                    {
-                                        if (uniform_variable_2 < 0.7)
-                                        {
-                                            Decease(p, year_count, month_count);
-                                            continue;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (uniform_variable_2 < 0.65)
-                                        {
-                                            Decease(p, year_count, month_count);
-                                            continue;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (p.gender == Gender.Male)
-                                    {
-                                        if (uniform_variable_2 < 0.99)
-                                        {
-                                            Decease(p, year_count, month_count);
-                                            continue;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (uniform_variable_2 < 0.98)
-                                        {
-                                            Decease(p, year_count, month_count);
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    double uniform_variable_2;
 
                     if(p.mate_id != "")
                     {
@@ -370,7 +291,7 @@ namespace SimulationModel
                         }
                     }
 
-                    if(p.gender == Gender.Female && p.mate_id != "" && p.pregnancy_months_left != -1)
+                    if(p.gender == Gender.Female && p.mate_id != "" && p.pregnancy_months_left == -1)
                     {
                         try
                         {
@@ -661,6 +582,7 @@ namespace SimulationModel
 
                     if (p.mating_desire)
                     {
+                        
                         List<Person> listToFindMate = (p.gender == Gender.Male ? femaleSubjects[year_count, month_count] : maleSubjects[year_count, month_count]);
                         
                         foreach(Person m in listToFindMate)
@@ -737,6 +659,12 @@ namespace SimulationModel
                         p.Set_Mating_Desire(false);
                     }
 
+                    if (p.age == p.decease_age && p.decease_month == month_count)
+                    {
+                        Decease(p, year_count, month_count);
+                        continue;
+                    }
+
                     Person personClone = p.Clone();
 
                     if (p.gender == Gender.Male)
@@ -763,7 +691,49 @@ namespace SimulationModel
                     }
                 }
 
+                // newborn babyes operations
+                foreach(Person p in bornedSubjects[year_count, month_count])
+                {
+                    if (p.age == p.decease_age && p.decease_month == month_count)
+                    {
+                        Decease(p, year_count, month_count);
+                        continue;
+                    }
 
+                    Person personClone = p.Clone();
+
+                    if (p.gender == Gender.Male)
+                    {
+                        if (month_count == 12)
+                        {
+                            maleSubjects[year_count + 1, 1].Add(personClone);
+                        }
+                        else
+                        {
+                            maleSubjects[year_count, month_count + 1].Add(personClone);
+                        }
+                    }
+                    else
+                    {
+                        if (month_count == 12)
+                        {
+                            femaleSubjects[year_count + 1, 1].Add(personClone);
+                        }
+                        else
+                        {
+                            femaleSubjects[year_count, month_count + 1].Add(personClone);
+                        }
+                    }
+                }
+
+                for(int i = 1; i < 100; ++i)
+                {
+                    for(int j = 1; j <= 12; ++j)
+                    {
+                        births += bornedSubjects[i, j].Count;
+                        deceases += deceasedSubjects[i, j].Count;
+                    }
+                }
 
                 ++month_count;
                 if(month_count == 13)
@@ -772,12 +742,194 @@ namespace SimulationModel
                     month_count = 1;
                 }
             }
+        
+        }
+
+        public double GetFemaleCount(int v1, int v2)
+        {
+            return (double)femaleSubjects[v1, v2].Count;
+        }
+
+        public double GetMaleCount(int v1, int v2)
+        {
+            return (double)maleSubjects[v1, v2].Count;
+        }
+
+        private Tuple<int, int> Generate_Death_Info(Gender g, int currMonth, int currAge = 0)
+        {
+            int age = 126, month = 1;
+
+            double uniform_variable;
+            if(g == Gender.Male)
+            {
+                uniform_variable = Generate_Uniform();
+                if(uniform_variable < 0.25 && currAge <= 12)
+                {
+                    age = Generate_Value(Math.Max(0, currAge), 12);
+                    if(age == currAge)
+                    {
+                        month = Generate_Value(currMonth, 12);
+                    }
+                    else
+                    {
+                        month = Generate_Value(1, 12);
+                    }
+                }
+                else
+                {
+                    uniform_variable = Generate_Uniform();
+                    if (uniform_variable < 0.1 && currAge <= 45)
+                    {
+                        age = Generate_Value(Math.Max(13, currAge), 45);
+                        if (age == currAge)
+                        {
+                            month = Generate_Value(currMonth, 12);
+                        }
+                        else
+                        {
+                            month = Generate_Value(1, 12);
+                        }
+                    }
+                    else
+                    {
+                        uniform_variable = Generate_Uniform();
+                        if (uniform_variable < 0.3 && currAge <= 76)
+                        {
+                            age = Generate_Value(Math.Max(46, currAge), 76);
+                            if (age == currAge)
+                            {
+                                month = Generate_Value(currMonth, 12);
+                            }
+                            else
+                            {
+                                month = Generate_Value(1, 12);
+                            }
+                        }
+                        else
+                        {
+                            uniform_variable = Generate_Uniform();
+                            if (uniform_variable < 0.7 && currAge <= 125)
+                            {
+                                age = Generate_Value(Math.Max(77, currAge), 125);
+                                if (age == currAge)
+                                {
+                                    month = Generate_Value(currMonth, 12);
+                                }
+                                else
+                                {
+                                    month = Generate_Value(1, 12);
+                                }
+                            }
+                            else
+                            {
+                                age = 126;
+                                if (age == currAge)
+                                {
+                                    month = Generate_Value(currMonth, 12);
+                                }
+                                else
+                                {
+                                    month = Generate_Value(1, 12);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                uniform_variable = Generate_Uniform();
+                if (uniform_variable < 0.25 && currAge <= 12)
+                {
+                    age = Generate_Value(Math.Max(0, currAge), 12);
+                    if (age == currAge)
+                    {
+                        month = Generate_Value(currMonth, 12);
+                    }
+                    else
+                    {
+                        month = Generate_Value(1, 12);
+                    }
+                }
+                else
+                {
+                    uniform_variable = Generate_Uniform();
+                    if (uniform_variable < 0.15 && currAge <= 45)
+                    {
+                        age = Generate_Value(Math.Max(13, currAge), 45);
+                        if (age == currAge)
+                        {
+                            month = Generate_Value(currMonth, 12);
+                        }
+                        else
+                        {
+                            month = Generate_Value(1, 12);
+                        }
+                    }
+                    else
+                    {
+                        uniform_variable = Generate_Uniform();
+                        if (uniform_variable < 0.35 && currAge <= 76)
+                        {
+                            age = Generate_Value(Math.Max(46, currAge), 76);
+                            if (age == currAge)
+                            {
+                                month = Generate_Value(currMonth, 12);
+                            }
+                            else
+                            {
+                                month = Generate_Value(1, 12);
+                            }
+                        }
+                        else
+                        {
+                            uniform_variable = Generate_Uniform();
+                            if (uniform_variable < 0.65 && currAge <= 125)
+                            {
+                                age = Generate_Value(Math.Max(77, currAge), 125);
+                                if (age == currAge)
+                                {
+                                    month = Generate_Value(currMonth, 12);
+                                }
+                                else
+                                {
+                                    month = Generate_Value(1, 12);
+                                }
+                            }
+                            else
+                            {
+                                age = 126;
+                                if (age == currAge)
+                                {
+                                    month = Generate_Value(currMonth, 12);
+                                }
+                                else
+                                {
+                                    month = Generate_Value(1, 12);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new Tuple<int, int>(age, month);
+
         }
 
         private void Decease(Person p, int year, int month)
         {
             p.Die();
             deceasedSubjects[year, month].Add(p);
+            if(p.gender == Gender.Male)
+            {
+                maleSubjects[year, month].Remove(p);
+            }
+            else
+            {
+                femaleSubjects[year, month].Remove(p);
+            }
+
             if(p.mate_id != "")
             {
                 try
@@ -868,7 +1020,7 @@ namespace SimulationModel
         }
 
         // generating an int number from v1 and v2 (inclusive both) having equal probability
-        private int Generate_Uniform(int v1, int v2)
+        private int Generate_Value(int v1, int v2)
         {
             int values = v2 - v1 + 1;
             double value_probability = (double)1 / (double)values;
@@ -880,7 +1032,7 @@ namespace SimulationModel
             }
             distribution_function[values] = 1;
 
-            int value_result = 0;
+            int value_result = -1;
             double uniform_variable = Generate_Uniform();
             for(int i = 1; i <= values; ++i)
             {
@@ -891,7 +1043,7 @@ namespace SimulationModel
                 }
             }
 
-            if(value_result == 0)
+            if(value_result == -1)
             {
                 throw new Exception("Some error ocurred -> no value generated");
             }
@@ -987,6 +1139,9 @@ namespace SimulationModel
 
     public class Person
     {
+        public int decease_age { get; private set; }
+        public int decease_month { get; private set; }
+
         // Common attributes
         public bool alive { get; private set; }
         public string id { get;  private set; }
@@ -1086,13 +1241,20 @@ namespace SimulationModel
             result.Set_Pregnancy_Month_Left(pregnancy_months_left);
             result.Set_Number_Of_Babyes(number_of_babyes);
             result.Set_Father_ID(father_id);
+            result.Set_Death_Info(new Tuple<int, int>(decease_age, decease_month));
 
             return result;
         }
 
-        private void Set_Age(int age)
+        public void Set_Age(int age)
         {
             this.age = age;
+        }
+
+        internal void Set_Death_Info(Tuple<int, int> deathInfo)
+        {
+            decease_age = deathInfo.Item1;
+            decease_month = deathInfo.Item2;
         }
     }
 
