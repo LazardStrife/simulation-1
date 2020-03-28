@@ -726,14 +726,7 @@ namespace SimulationModel
                     }
                 }
 
-                for(int i = 1; i < 100; ++i)
-                {
-                    for(int j = 1; j <= 12; ++j)
-                    {
-                        births += bornedSubjects[i, j].Count;
-                        deceases += deceasedSubjects[i, j].Count;
-                    }
-                }
+                
 
                 ++month_count;
                 if(month_count == 13)
@@ -742,7 +735,15 @@ namespace SimulationModel
                     month_count = 1;
                 }
             }
-        
+            for (int i = 1; i < 100; ++i)
+            {
+                for (int j = 1; j <= 12; ++j)
+                {
+                    births += bornedSubjects[i, j].Count;
+                    deceases += deceasedSubjects[i, j].Count;
+                }
+            }
+
         }
 
         public double GetFemaleCount(int v1, int v2)

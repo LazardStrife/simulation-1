@@ -10,13 +10,12 @@ namespace Evolving_Settlement
     class Program
     {
         static int year = 1, month = 1;
-        static bool automaticShowInfo = true;
+        static bool automaticShowInfo = false;
         static Simulation simulation;
         static string[] months = { "", "enero", "febrero", "marzo" ,"abril" ,"mayo" ,"junio" ,"julio" ,"agosto" ,"septiembre" ,"octubre" ,"noviembre", "diciembre" };
         static void Main(string[] args)
         {
-            //Start();
-            CalculateEspectedValues();
+            Start();
         }
 
         // monte carlo algorithm
@@ -49,7 +48,6 @@ namespace Evolving_Settlement
             Console.WriteLine("Valor esperado de la cantidad de nacidos hasta el año 100: " + birthsPerMonth);
             Console.WriteLine("Valor esperado de la cantidad de fallecidos hasta el año 100: " + deceasesPerMonth);
 
-            Console.ReadLine();
         }
 
         static void Start()
@@ -74,6 +72,14 @@ namespace Evolving_Settlement
 
             switch (input[0])
             {
+                case "r":
+                    simulation = new Simulation();
+                    year = 1;
+                    month = 1;
+                    goto startingLabel;
+                case "a":
+                    CalculateEspectedValues();
+                    goto startingLabel;
                 case "c":
                     Console.Clear();
                     goto startingLabel;
@@ -146,7 +152,7 @@ namespace Evolving_Settlement
             Console.WriteLine("Fecha Actual: " + months[month] + " del año " + year);
         }
 
-        static bool idON = false, ageON = false, genderON = false, mateON = false, birthdayON = false, desiredON = false, childrenON = false, isPregnantON = false;
+        static bool idON = true, ageON = true, genderON = true, mateON = false, birthdayON = false, desiredON = false, childrenON = false, isPregnantON = false;
         static void ShowDateInfo(int y, int m)
         {
             Tuple<List<Person>, List<Person>, List<Person>, List<Person>> info = simulation.DateInfo(y, m);
@@ -302,6 +308,8 @@ namespace Evolving_Settlement
             Console.WriteLine("q                    salir del simulador");
             Console.WriteLine("h                    consultar los comandos");
             Console.WriteLine("i                    mostrar informacion sobre el simulador");
+            Console.WriteLine("r                    reiniciar simulacion");
+            Console.WriteLine("a                    analizar aproximaciones de valores esperados");
             Console.WriteLine("d                    mostrar fecha actual");
             Console.WriteLine("c                    limpiar la consola");
             Console.WriteLine("n                    avanzar un mes");
